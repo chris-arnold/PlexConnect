@@ -9,7 +9,7 @@ inter-process-communication (queue): http://pymotw.com/2/multiprocessing/communi
 
 
 import sys, time
-from os import sep
+from os import sep, execv
 import socket
 from multiprocessing import Process, Pipe
 from multiprocessing.managers import BaseManager
@@ -174,6 +174,10 @@ def sighandler_shutdown(signum, frame):
     signal.signal(signal.SIGINT, signal.SIG_IGN)  # we heard you!
     cmdShutdown()
 
+def restart():
+    shutdown()
+    dprint('PlexConnect', 0, "Restarting")
+    execv(__file__, sys.argv)
 
 
 if __name__=="__main__":
