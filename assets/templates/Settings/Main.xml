@@ -163,6 +163,12 @@
                 <label>{{TEXT(Audio Boost %)}}</label>
                 <rightLabel>{{SETTING(audioboost)}}</rightLabel>
               </oneLineMenuItem>
+              <oneLineMenuItem id="updateDev" onSelect="update('dev')">
+                <label>{{TEXT(Update to Latest Dev Version)}}</label>
+                <accessories>
+                  <arrow/>
+                </accessories>
+              </oneLineMenuItem>
             </items>
           </menuSection>
           

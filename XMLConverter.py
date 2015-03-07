@@ -42,6 +42,8 @@ import Localize
 import PILBackgrounds
 from PILBackgrounds import isPILinstalled
 
+from updater import update
+
 g_param = {}
 def setParams(param):
     global g_param
@@ -325,6 +327,11 @@ def XML_PMS2aTV(PMS_address, path, options):
             g_ATVSettings.setSetting(UDID, 'tvshowfanart', 'Hide')
         
         return XML_Error('PlexConnect', 'Discover!')  # not an error - but aTV won't care anyways.
+
+    elif cmd=='updateDev':
+        dprint(__name__, 1, 'Update dev recieved in XMLConverter.py')
+        update('dev')
+        XMLtemplate = 'Settings/Main.xml'
 
     # Special case path requests
     if path.startswith('/search?'):

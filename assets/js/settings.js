@@ -320,3 +320,53 @@ atv.onPageUnload = function(pageID)
     log('Saving Settings file');
   }
 }
+
+update = function(updateType)
+{
+
+  setLabel = function(elem, label, text)
+  {
+      var elem_label = elem.getElementByTagName(label);
+      if (!elem_label)
+      {
+          elem_label = document.makeElementNamed(label);
+          elem.appendChild(elem_label);
+      }
+      elem_label.textContent = text;
+  };
+  
+  showPict = function(elem, pict)
+  {
+      var elem_acc = elem.getElementByTagName("accessories");
+      if (!elem_acc)
+      {
+          elem_acc = document.makeElementNamed("accessories");
+          elem.appendChild(elem_acc);
+      }
+      var elem_add = document.makeElementNamed(pict);
+      elem_acc.appendChild(elem_add);
+  };
+  
+  hidePict = function(elem, pict)
+  {
+      var elem_remove = elem.getElementByTagName("accessories");
+      if (elem_remove) elem_remove = elem_remove.getElementByTagName(pict);
+      if (elem_remove) elem_remove.removeFromParent();
+  };
+
+  if (updateType == 'dev')
+  {
+    var _myPlexElem = document.getElementById('updateDev')
+    var url = "{{URL(/)}}&PlexConnect=updateDev"
+    var req = new XMLHttpRequest();
+    req.open('GET', url, false);
+    req.send();
+    log('Updating to latest commit');
+
+    setLabel(_myPlexElem, 'rightLabel', '');
+    hidePict(_myPlexElem, 'arrow');
+    showPict(_myPlexElem, 'spinner');
+    
+  }
+
+}
