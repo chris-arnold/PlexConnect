@@ -1,36 +1,35 @@
 #!/usr/bin/env python
 
-#Integrated with PlexConnect
-#needs to be linked to a button in UI
-#Currently a 'lazy' implementation. All we do is DL the new tarball and overwrite
-#Ideally, would use a github library and use git clone to update (git clone needs to be run before this will work)
-
-#update to use a pygithub library
+#Need to remove release update button
+#Will only update to most recent dev commit
+#Has two update types. git and tarball DL
+#Need to send updates to UI from update script
+#	* Probably via JS popup window
+#	* Should have spinning wheel after click
+#	* After update, popup telling Success/fail and to close/open app
 
 import urllib2, json, ConfigParser, os, sys, tarfile, shutil
+import subprocess
 
 from Debug import *  # dprint()
 
 import pprint
 
-#sys.path.append( os.path.abspath(os.path.join(".", "PyGithub")))
-
-#from github import Github
-
 class updater():
 	def __init__(self, UType):
 		dprint('Updater', 0, "Initializing Updater")
 		self.updateRequested = UType
-		dprint("Updater",0, "Update Type: %s" % self.updateRequested)
+		#dprint("Updater",0, "Update Type: %s" % self.updateRequested)
 		#print "Need to open config file"
-		self.owner = "chris-arnold"
+		self.owner = "iBaa"			#"chris-arnold" for my update version when working
 		self.repo = "PlexConnect"
 		self.version = ""
 		self.updateType = ""
-		self.published = "" #from changelog/settings
+		self.published = "2014-12-14T18:36:19Z" #from config
 		self.status = ""
 		self.updateFile = "update.tar.gz"
 		self.changes = ""
+		self.gitInstalled = True
 		self.baseInstall = os.getcwd()
 		try:
 			changeLog = open("CHANGELOG.txt", "r")
@@ -42,10 +41,19 @@ class updater():
 			#exit()
 			changeLog.close()
 		except:
-			dprint ("Updater: ", 0, "No ChangeLog. Running Update Selected")
+			dprint ("Updater", 0, "No ChangeLog. Running Update Selected")
 
 		self.baseDownloadURL = os.path.join("https://github.com/", self.owner, self.repo, "archive")
 		self.baseURL = os.path.join("https://api.github.com/repos", self.owner, self.repo) #/releases/latest"
+		dprint('Updater', 0, 'Checking for git installation')
+		try:
+			null = open(os.devnull, 'w')
+			subprocess.Popen('git', stdout=null, stderr=null)
+			null.close()
+			dprint('Updater', 0, 'Git found. Will use Git Update')
+		except OSError:
+			self.gitInstalled = False
+			dprint('Updater', 0, 'Git not found, fall back to zip updates')
 
 		#self.upgrade()	#Allow Plexconnect to init this class and have it run the update
 
@@ -151,23 +159,44 @@ class updater():
 
 	def upgrade(self):
 		'Main Updater Function. Call this to do upgrade'
-		if self.updateRequested == "dev":
-			self.getLatestCommit()
-		elif self.updateRequested == "release":
-			self.getNewestRelease()
+		if self.gitInstalled:
+			self.gitUpdate()
 		else:
-			self.newestPublished = None
-			print "Invalid Update Type. Aborting"
+			if self.updateRequested == "dev":
+				self.getLatestCommit()
+			elif self.updateRequested == "release":
+				self.getNewestRelease()
+			else:
+				self.newestPublished = None
+				print "Invalid Update Type. Aborting"
 
-		if self.isUpdateRequired() or self.updateRequested != self.updateType:
-			dprint('Updater', 0, "Update Required")
-			self.getUpdate()
-			if self.status is "Success":
-				self.doUpdate()
-				self.writeLog()
-				dprint('Updater', 0, 'Update Complete')
+			if self.isUpdateRequired() or self.updateRequested != self.updateType:
+				#dprint('Updater', 0, "Update Required")
+				self.getUpdate()
+				if self.status is "Success":
+					self.doUpdate()
+					self.writeLog()
+					dprint('Updater', 0, 'Update Complete')
+			else:
+				dprint('Updater', 0, "No Update Required")
+
+	def gitUpdate(self):
+		'This update uses git if installed'
+		dprint('Updater', 0, 'Using git update')
+		if os.path.isdir('.git'):
+			process = subprocess.Popen(["git", "pull"])
+			output = process.communicate()[0]
 		else:
-			dprint('Updater', 0, "No Update Required")
+			dprint('Updater', 0, 'Updater has never been run. Setting things up..')
+			process = subprocess.Popen(["git", "clone", "https://github.com/iBaa/PlexConnect.git"])
+			output = process.communicate()[0]
+			self.copyTree("./PlexConnect/.git", "./.git")
+			shutil.rmtree("./PlexConnect")
+
+
+		dprint('Updater', 0, 'Git Update Complete')
+
+
 
 def update(UpdateType):
 	update = updater(UpdateType)
