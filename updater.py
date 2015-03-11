@@ -21,7 +21,7 @@ class updater():
 		self.updateRequested = UType
 		#dprint("Updater",0, "Update Type: %s" % self.updateRequested)
 		#print "Need to open config file"
-		self.owner = "iBaa"			#"chris-arnold" for my update version when working
+		self.owner = "chris-arnold"	
 		self.repo = "PlexConnect"
 		self.version = ""
 		self.updateType = ""
@@ -188,7 +188,7 @@ class updater():
 			output = process.communicate()[0]
 		else:
 			dprint('Updater', 0, 'Updater has never been run. Setting things up..')
-			process = subprocess.Popen(["git", "clone", "https://github.com/iBaa/PlexConnect.git"])
+			process = subprocess.Popen(["git", "clone", "https://github.com/chris-arnold/PlexConnect.git"])
 			output = process.communicate()[0]
 			self.copyTree("./PlexConnect/.git", "./.git")
 			shutil.rmtree("./PlexConnect")
